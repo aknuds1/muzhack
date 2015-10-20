@@ -237,7 +237,7 @@ class @DropzoneService
         (x) -> R.merge(x, {name: x.filename}))
       fileObjs = R.map(picker, existingFiles)
       logger.debug("Adding files to #{description} dropzone: #{
-        R.map(((f) -> f.filename), existingFiles).join(', ')}")
+        R.map(((f) -> f.url), existingFiles).join(', ')}")
       dropzone.addExistingFiles(fileObjs)
 
     dropzone
