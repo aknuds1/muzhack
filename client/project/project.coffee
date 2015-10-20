@@ -93,5 +93,17 @@ Template.project.events({
     logger.debug("Entering edit mode")
     # Kind of a hack, but stop tooltips from lingering
     Tooltips.hide()
+
+    previousData = JSON.parse(localStorage.getItem("projectEditing") || "")
+    if !R.isEmpty(previousData)
+      logger.debug("Previous editing data:", previousData)
+      if previousData.id == "#{@owner}/#{@projectId}"
+        logger.debug("Previous editing data corresponds to current project, applying")
+      else
+        logger.debug("Previous editing data doesn't correspond to current project, ignoring")
+    else
+      logger.debug("No previous editing data found")
+    TemplateVar.set(Template.editProject, "previousData", previousData)
+
     Session.set("isEditingProject", true)
 })

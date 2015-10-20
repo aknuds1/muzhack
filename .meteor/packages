@@ -51,3 +51,4 @@ jparker:crypto-sha256
 jparker:crypto-hmac
 aknudsen:tooltips
 dfischer:prerenderio
+frozeman:template-var

@@ -5,6 +5,15 @@ fileDropzone = null
 disableProjectEditing = ->
   Session.set("isEditingProject", false)
 
+getData = (context, parameter) ->
+  previousData = TemplateVar.get("previousData") || {}
+  if previousData[parameter]?
+    logger.debug("Parameter '#{parameter}' found in previous editing data")
+    previousData[parameter]
+  else
+    logger.debug("Parameter '#{parameter}' not found in previous editing data")
+    context.data[parameter]
+
 saveProject = (owner, projectId) ->
   title = trimWhitespace($("#title-input").val())
   description = markdownService.getDescription()
@@ -72,6 +81,7 @@ saveProject = (owner, projectId) ->
             notificationService.warn("Error", "Saving project to server failed: #{error}.")
           else
             disableProjectEditing()
+            localStorage.removeItem('projectEditing')
             logger.info("Successfully saved project")
       )
     , (error) ->
@@ -80,26 +90,19 @@ saveProject = (owner, projectId) ->
 
 Template.editProject.onRendered(->
   logger.debug("Project editing view rendered")
+  markdownService.reset()
+  Iron.controller().state.set("ignoreChanges", true)
+  markdownService.renderDescriptionEditor(getData(@, "description"))
+  markdownService.renderInstructionsEditor(getData(@, "instructions"))
+  pictureDropzone = dropzoneService.createDropzone("picture-dropzone", true, @data?.pictures)
+  logger.debug("Created picture dropzone")
+  fileDropzone = dropzoneService.createDropzone("file-dropzone", false, @data?.files)
+  logger.debug("Created file dropzone")
+  Iron.controller().state.set("ignoreChanges", false)
+
   Session.set("isWaiting", false)
   Session.set("isProjectModified", false)
   document.getElementById("title-input").focus()
-  markdownService.reset()
-)
-Template.descriptionEditor.onRendered(->
-  markdownService.renderDescriptionEditor(@data.description)
-)
-Template.instructionsEditor.onRendered(->
-  markdownService.renderInstructionsEditor(@data.instructions)
-)
-Template.picturesEditor.onRendered(->
-  logger.debug("Pictures editor rendered")
-  pictureDropzone = dropzoneService.createDropzone("picture-dropzone", true, @data?.pictures)
-  logger.debug("Created picture dropzone")
-)
-Template.filesEditor.onRendered(->
-  logger.debug("Files editor rendered")
-  fileDropzone = dropzoneService.createDropzone("file-dropzone", false, @data?.files)
-  logger.debug("Created file dropzone")
 )
 Template.project.events({
   'change #title-input': -> EditingService.onChange()
