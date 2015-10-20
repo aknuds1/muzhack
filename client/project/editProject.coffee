@@ -6,7 +6,7 @@ disableProjectEditing = ->
   Session.set("isEditingProject", false)
 
 getData = (context, parameter) ->
-  previousData = TemplateVar.get("previousData") || {}
+  previousData = Session.get("previousEditingData") || {}
   if previousData[parameter]?
     logger.debug("Parameter '#{parameter}' found in previous editing data")
     previousData[parameter]
@@ -91,14 +91,14 @@ saveProject = (owner, projectId) ->
 Template.editProject.onRendered(->
   logger.debug("Project editing view rendered")
   markdownService.reset()
-  Iron.controller().state.set("ignoreChanges", true)
+  Session.set("ignoreChanges", true)
   markdownService.renderDescriptionEditor(getData(@, "description"))
   markdownService.renderInstructionsEditor(getData(@, "instructions"))
   pictureDropzone = dropzoneService.createDropzone("picture-dropzone", true, @data?.pictures)
   logger.debug("Created picture dropzone")
   fileDropzone = dropzoneService.createDropzone("file-dropzone", false, @data?.files)
   logger.debug("Created file dropzone")
-  Iron.controller().state.set("ignoreChanges", false)
+  Session.set("ignoreChanges", false)
 
   Session.set("isWaiting", false)
   Session.set("isProjectModified", false)

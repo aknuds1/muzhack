@@ -103,7 +103,7 @@ Template.project.events({
         logger.debug("Previous editing data doesn't correspond to current project, ignoring")
     else
       logger.debug("No previous editing data found")
-    TemplateVar.set(Template.editProject, "previousData", previousData)
+    Session.set("previousEditingData", previousData)
 
     Session.set("isEditingProject", true)
 })
