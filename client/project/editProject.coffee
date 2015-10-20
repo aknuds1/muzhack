@@ -5,6 +5,10 @@ fileDropzone = null
 disableProjectEditing = ->
   Session.set("isEditingProject", false)
 
+clearCachedEdits = ->
+  logger.debug("Removing cached edits from localStorage")
+  localStorage.removeItem("projectEditing")
+
 getData = (context, parameter) ->
   previousData = Session.get("previousEditingData") || {}
   if previousData[parameter]?
@@ -81,7 +85,7 @@ saveProject = (owner, projectId) ->
             notificationService.warn("Error", "Saving project to server failed: #{error}.")
           else
             disableProjectEditing()
-            localStorage.removeItem('projectEditing')
+            clearCachedEdits()
             logger.info("Successfully saved project")
       )
     , (error) ->
@@ -92,6 +96,11 @@ Template.editProject.onRendered(->
   logger.debug("Project editing view rendered")
   markdownService.reset()
   Session.set("ignoreChanges", true)
+  document.getElementById("title-input").value = getData(@, "title")
+  document.getElementById("tags-input").value = getData(@, "tags").join(',')
+  selectedLicenseId = getData(@, "licenseId")
+  logger.debug("Setting license: '#{selectedLicenseId}'")
+  document.getElementById("license-select").value = selectedLicenseId
   markdownService.renderDescriptionEditor(getData(@, "description"))
   markdownService.renderInstructionsEditor(getData(@, "instructions"))
   pictureDropzone = dropzoneService.createDropzone("picture-dropzone", true, @data?.pictures)
@@ -123,6 +132,7 @@ Template.project.events({
     doCancel = () ->
       logger.debug("User confirmed canceling edit")
       Session.set("isProjectModified", false)
+      clearCachedEdits()
       disableProjectEditing()
     dontCancel = () ->
       logger.debug("User rejected canceling edit")
@@ -134,6 +144,7 @@ Template.project.events({
       notificationService.question("Discard Changes?",
         "Are you sure you wish to discard your changes?", doCancel, dontCancel)
     else
+      clearCachedEdits()
       disableProjectEditing()
   'click #remove-project': ->
     doRemove = () =>
@@ -162,7 +173,6 @@ Template.project.events({
       "Are you sure you wish remove this project?", doRemove, dontRemove)
 })
 Template.editProject.helpers(
-  tagsString: -> @tags.join(',')
   isWaiting: -> Session.get("isWaiting")
   licenseOptions: ->
     ({id: id, name: license.name, isSelected: id == @licenseId} for id, license of licenses)

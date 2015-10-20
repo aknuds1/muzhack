@@ -17,15 +17,15 @@ class @EditingService
       instructions = markdownService.getInstructions()
       tags = R.map(trimWhitespace, S.wordsDelim(/,/, $("#tags-input").val()))
       licenseSelect = document.getElementById("license-select")
-      license = licenseSelect.options[licenseSelect.selectedIndex].value
+      licenseId = licenseSelect.options[licenseSelect.selectedIndex].value
       logger.debug("Saving editing data to localstorage, project ID: '#{projectId}'")
-      logger.debug("Editing data:", description)
+      logger.debug("Editing data:", licenseId)
       localStorage.setItem("projectEditing", JSON.stringify({
         id: projectId
         title: title
         description: description
         instructions: instructions
         tags: tags
-        license: license
+        licenseId: licenseId
       }))
     , 0)

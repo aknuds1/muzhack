@@ -94,7 +94,11 @@ Template.project.events({
     # Kind of a hack, but stop tooltips from lingering
     Tooltips.hide()
 
-    previousData = JSON.parse(localStorage.getItem("projectEditing") || "")
+    try
+      previousData = JSON.parse(localStorage.getItem("projectEditing") || "{}")
+    catch error
+      logger.warn("Failed to parse cached editing data")
+      previousData = {}
     if !R.isEmpty(previousData)
       logger.debug("Previous editing data:", previousData)
       if previousData.id == "#{@owner}/#{@projectId}"
